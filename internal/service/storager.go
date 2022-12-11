@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"github.com/gtgaleevtimur/gofermart/internal/config"
 	"github.com/gtgaleevtimur/gofermart/internal/service"
 )
 
 type Storager interface {
 	Bootstrap() (err error)
-	Connect(conf *config.Config) (err error)
+	Connect(databaseDSN string) (err error)
 
 	GetBalance(userID uint64) (*service.Balance, error)
 
