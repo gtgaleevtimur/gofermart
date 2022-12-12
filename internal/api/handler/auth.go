@@ -11,9 +11,9 @@ func (h *Handler) Auth(w http.ResponseWriter, r *http.Request) (*service.Session
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			log.Info().Err(service.ErrUnauthorizedAccess)
+			log.Info().Err(ErrUnauthorizedAccess)
 			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return nil, service.ErrUnauthorizedAccess
+			return nil, ErrUnauthorizedAccess
 		}
 		log.Info().Err(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -21,7 +21,7 @@ func (h *Handler) Auth(w http.ResponseWriter, r *http.Request) (*service.Session
 	}
 	sessionToken := cookie.Value
 
-	// получим сессию из хранилища по токену
+	// получим сессию из хранилища по токену.
 	session, err := h.gophermart.Sessions.Get(sessionToken)
 	if err != nil {
 		log.Info().Err(err)
@@ -37,9 +37,9 @@ func (h *Handler) Auth(w http.ResponseWriter, r *http.Request) (*service.Session
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil, err
 		}
-		log.Info().Err(service.ErrSessionExpired)
+		log.Info().Err(ErrSessionExpired)
 		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return nil, service.ErrSessionExpired
+		return nil, ErrSessionExpired
 	}
 
 	return session, nil
