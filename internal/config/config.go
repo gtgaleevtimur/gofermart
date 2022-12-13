@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"github.com/caarlos0/env"
+	"log"
 )
 
 // Config -структура конфигурационного файла приложения.
@@ -13,31 +14,16 @@ type Config struct {
 }
 
 // NewConfig - конструктор конфигурационного файла.
-func NewConfig(options ...Option) *Config {
+func NewConfig() *Config {
 	conf := Config{}
+	flag.StringVar(&conf.Address, "a", ":8080", "SERVER_ADDRESS")
+	flag.StringVar(&conf.AccrualAddress, "r", "http://localhost:8081", "ACCRUAL_SYSTEM_ADDRESS")
+	flag.StringVar(&conf.DatabaseDSN, "d", "", "DATABASE_URI")
+	flag.Parse()
 
-	//если в аргументах получили Options, то применяем их к Config.
-	for _, opt := range options {
-		opt(&conf)
+	err := env.Parse(conf)
+	if err != nil {
+		log.Fatalln(err)
 	}
 	return &conf
-}
-
-// Option - функция применяемая к Config для его заполнения.
-type Option func(*Config)
-
-// WithParseEnv - парсит из окружения/флагов, изменяет Config.
-func WithParseEnv() Option {
-	return func(c *Config) {
-		env.Parse(c)
-		c.ParseFlags()
-	}
-}
-
-// ParseFlags - парсит флаги.
-func (c *Config) ParseFlags() {
-	flag.StringVar(&c.Address, "a", ":8080", "SERVER_ADDRESS")
-	flag.StringVar(&c.AccrualAddress, "r", c.AccrualAddress, "ACCRUAL_SYSTEM_ADDRESS")
-	flag.StringVar(&c.DatabaseDSN, "d", c.DatabaseDSN, "DATABASE_URI")
-	flag.Parse()
 }

@@ -17,7 +17,7 @@ import (
 func Run() {
 	log.Info().Msg("Start service `Gofermart`.")
 	// Конфигурация приложения через считывание флагов и переменных окружения.
-	conf := config.NewConfig(config.WithParseEnv())
+	conf := config.NewConfig()
 	log.Info().Msg("The service will be started with the following configuration:")
 	log.Info().Str("RUN_ADDRESS", conf.Address).
 		Str("ACCRUAL_SYSTEM_ADDRESS", conf.AccrualAddress).
