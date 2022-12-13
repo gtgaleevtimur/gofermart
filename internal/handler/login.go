@@ -18,7 +18,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	var acc entity.Account
+	var acc *entity.Account
 	err = json.Unmarshal(body, &acc)
 	if err != nil {
 		log.Info().Msg("failed to unmarshal request body.")
@@ -30,7 +30,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		token = c.Value
 	}
-	session, err := h.gophermart.Login(&acc, token)
+	session, err := h.gophermart.Login(acc, token)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidPair) || errors.Is(err, service.ErrUserNotFound) {
 			log.Info().Err(err)
