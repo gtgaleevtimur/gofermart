@@ -7,8 +7,6 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-
-	"github.com/gtgaleevtimur/gofermart/internal/config"
 )
 
 // Database - структура базы данных SQL.
@@ -19,7 +17,7 @@ type Database struct {
 }
 
 // NewDatabaseDSN - конструктор базы данных на основе SQL.
-func NewDatabaseDSN(conf *config.Config) (*Database, error) {
+func NewDatabaseDSN(databaseDSN string) (*Database, error) {
 	// Инициализация общего контекста.
 	ctx, cancel := context.WithCancel(context.Background())
 	s := &Database{
@@ -27,7 +25,7 @@ func NewDatabaseDSN(conf *config.Config) (*Database, error) {
 		cancel: cancel,
 	}
 	// Соединение и проверка таблиц.
-	err := s.Connect(conf)
+	err := s.Connect(databaseDSN)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +98,8 @@ func (d *Database) Bootstrap() (err error) {
 }
 
 // Connect - метод выполняет соединение с базой данных.
-func (d *Database) Connect(conf *config.Config) (err error) {
-	d.DB, err = sql.Open("pgx", conf.DatabaseDSN)
+func (d *Database) Connect(databaseDSN string) (err error) {
+	d.DB, err = sql.Open("pgx", databaseDSN)
 	if err != nil {
 		return err
 	}

@@ -19,4 +19,7 @@ type Storager interface {
 
 	AddWithdraw(withdraw *Withdraw) error
 	GetUserWithdrawals(userID uint64) ([]*Withdraw, error)
+
+	PullOrders(limit uint32) (map[uint64]*Order, error)
+	UpdateOrder(o *Order) error
 }

@@ -12,7 +12,6 @@ import (
 
 	"github.com/gtgaleevtimur/gofermart/internal/config"
 	"github.com/gtgaleevtimur/gofermart/internal/handler"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	s "github.com/gtgaleevtimur/gofermart/internal/service"
 )
 
@@ -29,7 +28,7 @@ func main() {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	// Инициализация хранилища сервиса.
-	db, err := repository.NewDatabaseDSN(conf.DatabaseDSN)
+	db, err := s.NewDatabaseDSN(conf.DatabaseDSN)
 	if err != nil {
 		log.Info().Msg("Postgres init failed.")
 		log.Fatal().Err(err)

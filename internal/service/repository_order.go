@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gtgaleevtimur/gofermart/internal/service"
 	"time"
 )
@@ -135,4 +136,110 @@ func (d *Database) GetUserOrders(id uint64) ([]*service.Order, error) {
 	}
 
 	return orders, nil
+}
+
+func (d *Database) PullOrders(limit uint32) (map[uint64]*service.Order, error) {
+	orders := make(map[uint64]*service.Order)
+	tx, err := d.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	get, err := tx.Prepare("SELECT * FROM orders WHERE status='NEW' or status='PROCESSING' order by uploaded_at LIMIT $1")
+	if err != nil {
+		return nil, err
+	}
+	txGet := tx.StmtContext(d.ctx, get)
+
+	rows, err := txGet.QueryContext(d.ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	if rows.Err() != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var order service.Order
+		accrual := new(sql.NullInt64)
+		date := new(string)
+
+		err = rows.Scan(&order.ID, &order.UserID, &order.Status, accrual, date)
+		if err != nil {
+			return nil, err
+		}
+
+		if accrual.Valid {
+			order.Accrual = uint64(accrual.Int64)
+		}
+
+		if order.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
+			return nil, err
+		}
+
+		orders[order.ID] = &order
+	}
+
+	return orders, nil
+}
+
+func (d *Database) UpdateOrder(o *service.Order) error {
+	tx, err := d.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	updateOrder, err := tx.Prepare("UPDATE orders SET status = $2, accrual = $3 WHERE id = $1")
+	if err != nil {
+		return err
+	}
+	txUpdateOrder := tx.StmtContext(d.ctx, updateOrder)
+
+	updateBalance, err := tx.Prepare("UPDATE balances SET current = $2, withdrawn = $3 WHERE user_id = $1")
+	if err != nil {
+		return err
+	}
+	txUpdateBalance := tx.StmtContext(d.ctx, updateBalance)
+
+	getBalance, err := tx.Prepare("SELECT * FROM balances WHERE user_id=$1")
+	if err != nil {
+		return err
+	}
+	txGetBalance := tx.StmtContext(d.ctx, getBalance)
+
+	// обновим заказ
+	if o.Status == "PROCESSED" {
+		// записываем начисление только для заказов со статусом выполнено
+		_, err = txUpdateOrder.ExecContext(d.ctx, o.ID, o.Status, o.Accrual)
+		if err != nil {
+			return fmt.Errorf("failed to update order - %w", err)
+		}
+
+		// обновим баланс пользователя: сначала получим текущее значение
+		b := &service.Balance{}
+		row := txGetBalance.QueryRowContext(d.ctx, o.UserID)
+		err = row.Scan(&b.UserID, &b.Current, &b.Withdrawn)
+		if err != nil {
+			return fmt.Errorf("failed to get user balance - %w", err)
+		}
+		current := b.Current + o.Accrual // прибавим начисленные баллы
+		// обновим баланс с новым значением
+		_, err = txUpdateBalance.ExecContext(d.ctx, b.UserID, current, b.Withdrawn)
+		if err != nil {
+			return fmt.Errorf("failed to update user balance - %w", err)
+		}
+	} else {
+		// для всех остальных статусов - начисления не записываем, баланс не обновляем
+		_, err = txUpdateOrder.ExecContext(d.ctx, o.ID, o.Status, o.Accrual)
+		if err != nil {
+			return fmt.Errorf("failed to update order - %w", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("update order transaction failed - %w", err)
+	}
+	return nil
 }

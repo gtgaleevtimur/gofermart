@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 	"sync"
 )
@@ -15,12 +14,12 @@ type User struct {
 
 type Users struct {
 	sync.RWMutex
-	storage repository.Storager
+	storage Storager
 	byLog   map[string]*User
 	byID    map[uint64]*User
 }
 
-func NewUsers(st repository.Storager) *Users {
+func NewUsers(st Storager) *Users {
 	return &Users{
 		storage: st,
 		byLog:   make(map[string]*User),

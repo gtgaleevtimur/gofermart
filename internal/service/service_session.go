@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	"sync"
 	"time"
 )
@@ -14,11 +13,11 @@ type Session struct {
 
 type Sessions struct {
 	sync.RWMutex
-	storage        repository.Storager
+	storage        Storager
 	bySessionToken map[string]*Session
 }
 
-func NewSessions(st repository.Storager) *Sessions {
+func NewSessions(st Storager) *Sessions {
 	return &Sessions{
 		storage:        st,
 		bySessionToken: make(map[string]*Session),

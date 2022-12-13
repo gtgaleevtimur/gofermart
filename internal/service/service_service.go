@@ -1,9 +1,7 @@
 package service
 
-import "github.com/gtgaleevtimur/gofermart/internal/repository"
-
 type Service struct {
-	Storage     repository.Storager
+	Storage     Storager
 	Users       *Users
 	Sessions    *Sessions
 	Orders      *Orders
@@ -11,7 +9,7 @@ type Service struct {
 	Withdrawals *Withdrawals
 }
 
-func NewService(s repository.Storager) *Service {
+func NewService(s Storager) *Service {
 	service := &Service{
 		Storage:  s,
 		Users:    NewUsers(s),
