@@ -3,11 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/gtgaleevtimur/gofermart/internal/service"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
+	"github.com/gtgaleevtimur/gofermart/internal/service"
 )
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {

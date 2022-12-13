@@ -18,7 +18,6 @@ var (
 	ErrOrderGetTransaction       = errors.New("failed to get order")
 	ErrOrderAddTransaction       = errors.New("add order transaction failed")
 	ErrOrderGetTransactions      = errors.New("get all order transaction failed")
-	ErrBalanceGetTransaction     = errors.New("get balance transaction failed")
 	ErrWithdrawalPostTransaction = errors.New("post withdraw transaction failed")
 	ErrWithdrawalsGetTransaction = errors.New("get withdrawals transaction failed")
 

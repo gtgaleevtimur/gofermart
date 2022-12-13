@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// GetOrder - метод возвращающий заказ из БД по его номеру.
 func (d *Database) GetOrder(orderID uint64) (*service.Order, error) {
 	order := &service.Order{}
 	accrual := new(sql.NullInt64)
@@ -33,6 +34,9 @@ func (d *Database) GetOrder(orderID uint64) (*service.Order, error) {
 		order.Accrual = uint64(accrual.Int64)
 	}
 	if order.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 	return order, nil

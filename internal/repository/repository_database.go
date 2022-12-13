@@ -109,3 +109,15 @@ func (d *Database) Connect(databaseDSN string) (err error) {
 	}
 	return nil
 }
+
+// Shutdown - метод закрытия соединения с БД.
+func (d *Database) Shutdown() error {
+	// Закрываем все текущие запросы.
+	d.cancel()
+	err := d.DB.Close()
+	if err != nil {
+		return err
+	}
+	log.Info().Msg("connection database closed")
+	return nil
+}
