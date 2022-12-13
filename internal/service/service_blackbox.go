@@ -23,7 +23,7 @@ type accrualOrder struct {
 	Accrual float64 `json:"accrual"`
 }
 
-type Accrl struct {
+type Blackbox struct {
 	url       string
 	storage   Storager
 	limit     uint32
@@ -31,22 +31,22 @@ type Accrl struct {
 	pool      map[uint64]*Order
 }
 
-type accOrder struct {
-	*Accrl
+type blackboxOrder struct {
+	*Blackbox
 	ctx   context.Context
 	order *Order
 }
 
-func NewAccrl(s Storager, addr string) *Accrl {
+func NewBlackbox(s Storager, addr string) *Blackbox {
 
-	return &Accrl{
+	return &Blackbox{
 		limit:   1000,
 		url:     addr + "/api/orders/",
 		storage: s,
 	}
 }
 
-func (a *Accrl) Run() {
+func (a *Blackbox) Run() {
 	rand.Seed(time.Now().UnixNano())
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -63,13 +63,13 @@ func (a *Accrl) Run() {
 	a.start(ctx)
 }
 
-func (a *Accrl) start(ctx context.Context) {
+func (a *Blackbox) start(ctx context.Context) {
 	for {
 		a.refresh()
 
 		g, _ := errgroup.WithContext(ctx) // используем errgroup
 		for _, order := range a.pool {
-			w := &accOrder{Accrl: a, ctx: ctx, order: order}
+			w := &blackboxOrder{Blackbox: a, ctx: ctx, order: order}
 			g.Go(w.Do)
 		}
 		err := g.Wait()
@@ -107,7 +107,7 @@ func (a *Accrl) start(ctx context.Context) {
 	}
 }
 
-func (a *Accrl) refresh() {
+func (a *Blackbox) refresh() {
 	limit := atomic.LoadUint32(&a.limit)
 
 	ors, err := a.storage.PullOrders(limit) // получаем заказы со статусом NEW и PROCESSING, отсортированные по дате поступления
@@ -133,7 +133,7 @@ func (a *Accrl) refresh() {
 	log.Info().Msg(msg)
 }
 
-func (ao *accOrder) Do() error {
+func (ao *blackboxOrder) Do() error {
 	ctx, cancel := context.WithTimeout(ao.ctx, 60*time.Second)
 	defer cancel()
 	order := ao.order

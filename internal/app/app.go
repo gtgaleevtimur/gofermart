@@ -21,12 +21,12 @@ func Run() {
 	log.Info().Msg("The service will be started with the following configuration:")
 	log.Info().Str("RUN_ADDRESS", conf.Address).
 		Str("ACCRUAL_SYSTEM_ADDRESS", conf.AccrualAddress).
-		Str("DATABASE_URI", conf.DatabaseDSN)
+		Str("DATABASE_URI", conf.DatabaseURI)
 	// Инициализация канала Grace-ful Shutdown.
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	// Инициализация хранилища сервиса.
-	db, err := repository.NewDatabaseDSN(conf.DatabaseDSN)
+	db, err := repository.NewDatabaseDSN(conf.DatabaseURI)
 	if err != nil {
 		log.Info().Msg("Postgres init failed.")
 		log.Fatal().Err(err)
@@ -77,6 +77,6 @@ func Run() {
 			}
 		}
 	}()
-	blackbox := s.NewAccrl(db, conf.AccrualAddress)
+	blackbox := s.NewBlackbox(db, conf.AccrualAddress)
 	blackbox.Run()
 }
