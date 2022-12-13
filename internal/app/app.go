@@ -2,8 +2,7 @@ package app
 
 import (
 	"context"
-	"flag"
-	"github.com/caarlos0/env"
+	"github.com/gtgaleevtimur/gofermart/internal/config"
 	"github.com/gtgaleevtimur/gofermart/internal/handler"
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	s "github.com/gtgaleevtimur/gofermart/internal/service"
@@ -15,28 +14,19 @@ import (
 	"time"
 )
 
-type config struct {
-	Addr                 string `env:"RUN_ADDRESS"`
-	DatabaseURI          string `env:"DATABASE_URI"`
-	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
-}
-
 func Run() {
-	cfg := new(config)
-	flag.StringVar(&cfg.Addr, "a", ":8080", "Service run address")
-	flag.StringVar(&cfg.DatabaseURI, "d", "", "Postgres URI")
-	flag.StringVar(&cfg.AccrualSystemAddress, "r", "http://localhost:8081", "Accrual system address")
-	flag.Parse()
-
-	err := env.Parse(cfg)
-	if err != nil {
-		log.Fatal().Err(err)
-	}
+	log.Info().Msg("Start service `Gofermart`.")
+	// Конфигурация приложения через считывание флагов и переменных окружения.
+	conf := config.NewConfig()
+	log.Info().Msg("The service will be started with the following configuration:")
+	log.Info().Str("RUN_ADDRESS", conf.Address).
+		Str("ACCRUAL_SYSTEM_ADDRESS", conf.AccrualAddress).
+		Str("DATABASE_URI", conf.DatabaseDSN)
 	// Инициализация канала Grace-ful Shutdown.
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	// Инициализация хранилища сервиса.
-	db, err := repository.NewDatabaseDSN(cfg.DatabaseURI)
+	db, err := repository.NewDatabaseDSN(conf.DatabaseDSN)
 	if err != nil {
 		log.Info().Msg("Postgres init failed.")
 		log.Fatal().Err(err)
@@ -47,7 +37,7 @@ func Run() {
 	hand := handler.NewHandler(gophermart)
 	// Инициализация сервера.
 	server := http.Server{
-		Addr:    cfg.Addr,
+		Addr:    conf.Address,
 		Handler: hand.R(),
 	}
 	// Инициализация канала для ошибки сервера.
@@ -87,6 +77,6 @@ func Run() {
 			}
 		}
 	}()
-	blackbox := s.NewAccrl(db, cfg.AccrualSystemAddress)
+	blackbox := s.NewAccrl(db, conf.AccrualAddress)
 	blackbox.Run()
 }
