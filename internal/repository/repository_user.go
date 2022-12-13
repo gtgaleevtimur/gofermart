@@ -61,7 +61,7 @@ func (d *Database) GetUser(key interface{}) (*service.User, error) {
 		return nil, err
 	}
 	defer tx.Rollback()
-	stById, err := tx.Prepare("SELECT * FROM users WHERE id=$1")
+	stByID, err := tx.Prepare("SELECT * FROM users WHERE id=$1")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (d *Database) GetUser(key interface{}) (*service.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	txById := tx.StmtContext(d.ctx, stById)
+	txByID := tx.StmtContext(d.ctx, stByID)
 	txByLog := tx.StmtContext(d.ctx, stByLog)
 	u := service.User{}
 	var row *sql.Row
@@ -77,7 +77,7 @@ func (d *Database) GetUser(key interface{}) (*service.User, error) {
 	case string:
 		row = txByLog.QueryRowContext(d.ctx, k)
 	case uint64:
-		row = txById.QueryRowContext(d.ctx, k)
+		row = txByID.QueryRowContext(d.ctx, k)
 	default:
 		return nil, service.ErrTypeNotAllowed
 	}

@@ -112,7 +112,7 @@ func (a *Accrl) refresh() {
 
 	ors, err := a.storage.PullOrders(limit) // получаем заказы со статусом NEW и PROCESSING, отсортированные по дате поступления
 	if err != nil {
-		msg := fmt.Sprintf("failed to get orders for pool -", err)
+		msg := fmt.Sprintf("failed to get orders for pool-%s", err.Error())
 		log.Info().Msg(msg)
 		return
 	}
@@ -161,7 +161,7 @@ func (ao *accOrder) Do() error {
 	if resp.StatusCode() == http.StatusTooManyRequests {
 		n := uint32(rand.Intn(10)) + 2 // эмулятор переменного кол-во запросов
 		atomic.StoreUint32(&ao.limit, n)
-		msg = fmt.Sprintf("too many requests detected", string(resp.Body()))
+		msg = fmt.Sprintf("too many requests detected:%s", string(resp.Body()))
 		log.Info().Msg(msg)
 		return ErrTooManyRequests
 	}

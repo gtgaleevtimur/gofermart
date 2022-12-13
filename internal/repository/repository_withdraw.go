@@ -17,7 +17,7 @@ func (d *Database) AddWithdraw(withdraw *service.Withdraw) error {
 	if err != nil {
 		return service.ErrWithdrawalPostTransaction
 	}
-	txGetById := tx.StmtContext(d.ctx, getByID)
+	txGetByID := tx.StmtContext(d.ctx, getByID)
 
 	insertWithdraw, err := tx.Prepare("INSERT INTO withdrawals (order_id, user_id, sum, processed_at) VALUES ($1, $2, $3, $4)")
 	if err != nil {
@@ -62,7 +62,7 @@ func (d *Database) AddWithdraw(withdraw *service.Withdraw) error {
 	// добавим историю списаний
 	var bw service.Withdraw
 	date := new(string)
-	row = txGetById.QueryRowContext(d.ctx, withdraw.OrderID)
+	row = txGetByID.QueryRowContext(d.ctx, withdraw.OrderID)
 	err = row.Scan(&bw.OrderID, &bw.UserID, &bw.Sum, date)
 	if err != nil {
 		if err == sql.ErrNoRows {

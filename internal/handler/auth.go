@@ -38,7 +38,7 @@ func (h *Handler) Auth(w http.ResponseWriter, r *http.Request) (*service.Session
 			return nil, err
 		}
 		log.Info().Err(ErrSessionExpired)
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, ErrSessionExpired.Error(), http.StatusUnauthorized)
 		return nil, ErrSessionExpired
 	}
 

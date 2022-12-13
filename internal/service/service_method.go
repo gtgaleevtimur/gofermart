@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
+	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
 	"time"
@@ -31,6 +32,9 @@ func (s *Service) Login(acc *entity.Account, token string) (*Session, error) {
 	}
 	if token != "" {
 		err = s.Sessions.Delete(token)
+		if err != nil {
+			log.Info().Err(err)
+		}
 	}
 	newToken := uuid.NewString()
 	expires := time.Now().Add(600 * time.Second)

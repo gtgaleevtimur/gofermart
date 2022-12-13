@@ -43,7 +43,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if session == nil {
 		log.Info().Msg("nil session received")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "nil session received", http.StatusInternalServerError)
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
