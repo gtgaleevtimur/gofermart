@@ -84,3 +84,25 @@ type OrderX struct {
 	Accrual    float64 `json:"accrual,omitempty"`
 	UploadedAt string  `json:"uploaded_at"`
 }
+
+type Balance struct {
+	UserID    uint64
+	Current   uint64
+	Withdrawn uint64
+}
+
+type BalanceMemory struct {
+	sync.RWMutex
+	ByUserID map[uint64]*Balance
+}
+
+func NewBalance() *BalanceMemory {
+	return &BalanceMemory{
+		ByUserID: make(map[uint64]*Balance),
+	}
+}
+
+type BalanceX struct {
+	Current   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
+}

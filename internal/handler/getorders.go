@@ -7,8 +7,6 @@ import (
 )
 
 func (c *Controller) GetOrders(w http.ResponseWriter, r *http.Request) {
-	var err error
-
 	st, err := c.auth(w, r)
 	if err != nil {
 		return

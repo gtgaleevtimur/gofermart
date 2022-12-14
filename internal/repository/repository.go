@@ -18,6 +18,7 @@ type Repository struct {
 	userMemory    *entity.UsersMemory
 	sessionMemory *entity.SessionMemory
 	ordersMemory  *entity.OrdersMemory
+	balanceMemory *entity.BalanceMemory
 }
 
 // NewRepository - конструктор новой базы данных.
@@ -31,6 +32,7 @@ func NewRepository(addr string) (*Repository, error) {
 		userMemory:    entity.NewUsers(),
 		sessionMemory: entity.NewSessions(),
 		ordersMemory:  entity.NewOrders(),
+		balanceMemory: entity.NewBalance(),
 	}
 	err := r.init(addr)
 	if err != nil {

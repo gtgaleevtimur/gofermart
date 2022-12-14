@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/rs/zerolog/log"
 )
 
@@ -54,4 +57,17 @@ func (r *Repository) initBalanceStatements() error {
 	r.stmts["balanceUpdate"] = stmt
 
 	return nil
+}
+
+func (r *Repository) GetBalanceDB(userID uint64) (*entity.Balance, error) {
+	b := &entity.Balance{}
+	row := r.stmts["balanceGet"].QueryRowContext(r.ctx, userID)
+	err := row.Scan(&b.UserID, &b.Current, &b.Withdrawn)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("user balance not found - %s", err.Error())
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user balance - %s", err.Error())
+	}
+	return b, nil
 }

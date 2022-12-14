@@ -243,6 +243,28 @@ func (r *Repository) GetOrders(userID uint64) ([]*entity.OrderX, error) {
 	return orsPr, nil
 }
 
+func (r *Repository) GetBalance(userID uint64) (*entity.BalanceX, error) {
+	var err error
+	r.balanceMemory.RLock()
+	b, ok := r.balanceMemory.ByUserID[userID]
+	r.balanceMemory.RUnlock()
+	if !ok {
+		b, err = r.GetBalanceDB(userID)
+		if err != nil {
+			return nil, err
+		}
+		r.balanceMemory.Lock()
+		r.balanceMemory.ByUserID[userID] = b
+		r.balanceMemory.Unlock()
+	}
+	blx := &entity.BalanceX{
+		Current:   float64(b.Current) / 100,
+		Withdrawn: float64(b.Withdrawn) / 100,
+	}
+
+	return blx, nil
+}
+
 func HashPass(password string) ([]byte, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
 	if err != nil {
