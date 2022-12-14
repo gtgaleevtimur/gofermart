@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
+	"github.com/gtgaleevtimur/gofermart/internal/loon"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -95,6 +98,26 @@ func (r *Repository) AddSession(session *entity.Session) error {
 	return nil
 }
 
+func (r *Repository) GetSession(token string) (*entity.Session, error) {
+	var err error
+
+	r.sessionMemory.RLock()
+	session, ok := r.sessionMemory.BySessionToken[token]
+	r.sessionMemory.RUnlock()
+	if !ok {
+		session, err = r.GetSessionDB(token)
+		if err != nil {
+			return nil, fmt.Errorf("token session not found - %s", err.Error())
+		}
+
+		r.sessionMemory.Lock()
+		r.sessionMemory.BySessionToken[session.Token] = session
+		r.sessionMemory.Unlock()
+	}
+
+	return session, nil
+}
+
 func (r *Repository) DeleteSession(token string) error {
 	r.sessionMemory.Lock()
 	delete(r.sessionMemory.BySessionToken, token)
@@ -138,6 +161,86 @@ func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 	}
 
 	return u, nil
+}
+
+func (r *Repository) PostOrders(orderID, userID uint64) error {
+	err := r.AddOrders(orderID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *Repository) AddOrders(orderID, userID uint64) error {
+	strOrderID := strconv.Itoa(int(orderID))
+	if !loon.IsValid(strOrderID) {
+		return ErrOrderInvalidFormat
+	}
+
+	order, _ := r.GetOrder(orderID)
+	if order != nil {
+		if order.UserID == userID {
+			return ErrOrderAlreadyLoadedByUser
+		}
+		return ErrOrderAlreadyLoadedByAnotherUser
+	}
+
+	order = &entity.Order{
+		ID:         orderID,
+		UserID:     userID,
+		Status:     "NEW",
+		UploadedAt: time.Now(),
+	}
+	err := r.AddOrderDB(order)
+	if err != nil {
+		return err
+	}
+
+	r.ordersMemory.Lock()
+	r.ordersMemory.ByID[orderID] = order
+	r.ordersMemory.Unlock()
+
+	return nil
+}
+
+func (r *Repository) GetOrder(orderID uint64) (*entity.Order, error) {
+	var err error
+
+	r.ordersMemory.RLock()
+	o, ok := r.ordersMemory.ByID[orderID]
+	r.ordersMemory.RUnlock()
+	if !ok {
+		o, err = r.GetOrderDB(orderID)
+		if err != nil {
+			return nil, err
+		}
+		r.ordersMemory.Lock()
+		r.ordersMemory.ByID[orderID] = o
+		r.ordersMemory.Unlock()
+	}
+
+	return o, nil
+}
+
+func (r *Repository) GetOrders(userID uint64) ([]*entity.OrderX, error) {
+	ors, err := r.GetOrdersDB(userID)
+	if err != nil {
+		return nil, err
+	}
+	layout := "2006-01-02T15:04:05-07:00"
+
+	orsPr := make([]*entity.OrderX, 0)
+	for _, o := range ors {
+		po := &entity.OrderX{
+			Number:     fmt.Sprint(o.ID),
+			Status:     strings.TrimSpace(o.Status),
+			Accrual:    float64(o.Accrual) / 100,
+			UploadedAt: o.UploadedAt.Format(layout),
+		}
+		orsPr = append(orsPr, po)
+	}
+	return orsPr, nil
 }
 
 func HashPass(password string) ([]byte, error) {

@@ -13,7 +13,7 @@ func (c *Controller) log(r *http.Request, msg string) {
 		reqID = "[" + reqID + "]"
 	}
 	url := fmt.Sprintf(`"%s %s%s%s"`, r.Method, "http://", r.Host, r.URL)
-	log.Debug().Str("reqID", reqID).
+	log.Info().Str("reqID", reqID).
 		Str("url", url).
 		Msg(msg)
 }

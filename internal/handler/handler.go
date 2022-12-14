@@ -26,13 +26,13 @@ func NewRouter(r *repository.Repository) chi.Router {
 		rout.Post("/register", controller.Register)
 		rout.Post("/login", controller.Login)
 
-		rout.Post("/orders", controller.postOrders)
-		rout.Get("/orders", controller.getOrders)
+		rout.Post("/orders", controller.PostOrders)
+		rout.Get("/orders", controller.GetOrders)
 
-		rout.Get("/balance", controller.getBalance)
+		rout.Get("/balance", controller.GetBalance)
 
-		rout.Post("/balance/withdraw", controller.postWithdraw)
-		rout.Get("/balance/withdrawals", controller.getWithdrawals)
+		rout.Post("/balance/withdraw", controller.PostWithdraw)
+		rout.Get("/balance/withdrawals", controller.GetWithdrawals)
 	})
 
 	router.NotFound(NotFound())

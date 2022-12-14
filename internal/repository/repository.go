@@ -17,6 +17,7 @@ type Repository struct {
 	stmts         map[string]*sql.Stmt
 	userMemory    *entity.UsersMemory
 	sessionMemory *entity.SessionMemory
+	ordersMemory  *entity.OrdersMemory
 }
 
 // NewRepository - конструктор новой базы данных.
@@ -29,6 +30,7 @@ func NewRepository(addr string) (*Repository, error) {
 		stmts:         make(map[string]*sql.Stmt),
 		userMemory:    entity.NewUsers(),
 		sessionMemory: entity.NewSessions(),
+		ordersMemory:  entity.NewOrders(),
 	}
 	err := r.init(addr)
 	if err != nil {

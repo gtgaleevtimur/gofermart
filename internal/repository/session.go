@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/rs/zerolog/log"
@@ -82,4 +83,18 @@ func (r *Repository) AddSessionDB(session *entity.Session) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) GetSessionDB(token string) (*entity.Session, error) {
+	session := &entity.Session{}
+	row := r.stmts["sessionsGet"].QueryRowContext(r.ctx, token)
+	err := row.Scan(&session.UserID, &session.Token, &session.Expiry)
+	if err == sql.ErrNoRows {
+		return nil, ErrSessionNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session - %s", err.Error())
+	}
+
+	return session, nil
 }
