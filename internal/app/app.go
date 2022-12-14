@@ -16,4 +16,5 @@ func Run() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Repository initialization failed")
 	}
+
 }
