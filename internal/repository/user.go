@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/rs/zerolog/log"
 )
 
@@ -62,4 +65,87 @@ func (r *Repository) initUsersStatements() error {
 	r.stmts["usersDelete"] = stmt
 
 	return nil
+}
+
+func (r *Repository) AddUserDB(u *entity.User) (uint64, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	txInsert := tx.StmtContext(r.ctx, r.stmts["usersInsert"])
+	txGet := tx.StmtContext(r.ctx, r.stmts["usersGetByLogin"])
+	txInsertBalance := tx.StmtContext(r.ctx, r.stmts["balanceInsert"])
+
+	row := txGet.QueryRowContext(r.ctx, u.Login)
+	blankUser := entity.User{}
+	err = row.Scan(&blankUser.ID, &blankUser.Login, &blankUser.Password)
+	if err == sql.ErrNoRows {
+		_, err = txInsert.ExecContext(r.ctx, u.Login, u.Password)
+		if err != nil {
+			return 0, err
+		}
+
+		row = txGet.QueryRowContext(r.ctx, u.Login)
+		err = row.Scan(&u.ID, &u.Login, &u.Password)
+		if err != nil {
+			return 0, err
+		}
+
+		_, err = txInsertBalance.ExecContext(r.ctx, u.ID)
+		if err != nil {
+			return 0, err
+		}
+
+	} else if err != nil {
+		return 0, err
+	} else {
+		return 0, ErrLoginAlreadyTaken
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, fmt.Errorf("add user transaction failed - %s", err.Error())
+	}
+
+	return u.ID, nil
+}
+
+func (r *Repository) GetUserDB(byKey interface{}) (*entity.User, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	txGetByLogin := tx.StmtContext(r.ctx, r.stmts["usersGetByLogin"])
+	txGetByID := tx.StmtContext(r.ctx, r.stmts["usersGetByID"])
+
+	var u entity.User
+	var row *sql.Row
+
+	switch key := byKey.(type) {
+	case string:
+		row = txGetByLogin.QueryRowContext(r.ctx, key)
+	case uint64:
+		row = txGetByID.QueryRowContext(r.ctx, key)
+	default:
+		return nil, fmt.Errorf("given type not implemented")
+	}
+
+	err = row.Scan(&u.ID, &u.Login, &u.Password)
+	if err == sql.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("get user transaction failed - %s", err.Error())
+	}
+
+	return &u, nil
 }

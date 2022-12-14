@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/rs/zerolog/log"
 )
 
@@ -52,6 +54,32 @@ func (r *Repository) initSessionsStatements() error {
 		return err
 	}
 	r.stmts["sessionsDelete"] = stmt
+
+	return nil
+}
+
+func (r *Repository) DeleteSessionDB(token string) error {
+	res, err := r.stmts["sessionsDelete"].ExecContext(r.ctx, token)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("session not found")
+	}
+
+	return nil
+}
+
+func (r *Repository) AddSessionDB(session *entity.Session) error {
+	_, err := r.stmts["sessionsInsert"].ExecContext(r.ctx, session.UserID, session.Token, session.Expiry)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

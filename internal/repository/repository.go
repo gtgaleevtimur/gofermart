@@ -4,16 +4,19 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 type Repository struct {
-	db     *sql.DB
-	ctx    context.Context
-	cancel context.CancelFunc
-	stmts  map[string]*sql.Stmt
+	db            *sql.DB
+	ctx           context.Context
+	cancel        context.CancelFunc
+	stmts         map[string]*sql.Stmt
+	userMemory    *entity.UsersMemory
+	sessionMemory *entity.SessionMemory
 }
 
 // NewRepository - конструктор новой базы данных.
@@ -21,9 +24,11 @@ func NewRepository(addr string) (*Repository, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	r := &Repository{
-		ctx:    ctx,
-		cancel: cancel,
-		stmts:  make(map[string]*sql.Stmt),
+		ctx:           ctx,
+		cancel:        cancel,
+		stmts:         make(map[string]*sql.Stmt),
+		userMemory:    entity.NewUsers(),
+		sessionMemory: entity.NewSessions(),
 	}
 	err := r.init(addr)
 	if err != nil {

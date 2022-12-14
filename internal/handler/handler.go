@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+const (
+	ContentTypeApplicationJSON = "application/json"
+	ContentTypeTextPlain       = "text/plain"
+)
+
 // NewRouter - функция инициализирующая и настраивающая роутер сервиса.
 func NewRouter(r *repository.Repository) chi.Router {
 	router := chi.NewRouter()
@@ -19,7 +24,7 @@ func NewRouter(r *repository.Repository) chi.Router {
 
 	router.Route("/api/user", func(rout chi.Router) {
 		rout.Post("/register", controller.Register)
-		rout.Post("/login", controller.login)
+		rout.Post("/login", controller.Login)
 
 		rout.Post("/orders", controller.postOrders)
 		rout.Get("/orders", controller.getOrders)
