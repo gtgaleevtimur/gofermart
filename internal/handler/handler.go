@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"net/http"
 )
 
@@ -13,7 +13,7 @@ const (
 )
 
 // NewRouter - функция инициализирующая и настраивающая роутер сервиса.
-func NewRouter(r *repository.Repository) chi.Router {
+func NewRouter(r entity.Storager) chi.Router {
 	router := chi.NewRouter()
 	controller := newController(r)
 	router.Use(middleware.Compress(3, "gzip"))
@@ -42,10 +42,10 @@ func NewRouter(r *repository.Repository) chi.Router {
 }
 
 type Controller struct {
-	Storage *repository.Repository
+	Storage entity.Storager
 }
 
-func newController(s *repository.Repository) *Controller {
+func newController(s entity.Storager) *Controller {
 	return &Controller{Storage: s}
 }
 

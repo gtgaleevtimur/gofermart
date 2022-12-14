@@ -22,7 +22,7 @@ type Repository struct {
 }
 
 // NewRepository - конструктор новой базы данных.
-func NewRepository(addr string) (*Repository, error) {
+func NewRepository(addr string) (entity.Storager, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	r := &Repository{

@@ -183,3 +183,71 @@ func (r *Repository) GetOrdersDB(id uint64) ([]*entity.Order, error) {
 	}
 	return orders, nil
 }
+
+func (r *Repository) GetPullOrders(limit uint32) (map[uint64]*entity.Order, error) {
+	orders := make(map[uint64]*entity.Order)
+
+	rows, err := r.stmts["ordersGetForPool"].QueryContext(r.ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+	if rows.Err() != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var bo entity.Order
+		accrual := new(sql.NullInt64)
+		date := new(string)
+		err = rows.Scan(&bo.ID, &bo.UserID, &bo.Status, accrual, date)
+		if err != nil {
+			return nil, err
+		}
+		if accrual.Valid {
+			bo.Accrual = uint64(accrual.Int64)
+		}
+		if bo.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
+			return nil, err
+		}
+		orders[bo.ID] = &bo
+	}
+	return orders, nil
+}
+
+func (r *Repository) UpdateOrder(o *entity.Order) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	txUpdateOrder := tx.StmtContext(r.ctx, r.stmts["ordersUpdate"])
+	txUpdateBalance := tx.StmtContext(r.ctx, r.stmts["balanceUpdate"])
+	txGetBalance := tx.StmtContext(r.ctx, r.stmts["balanceGet"])
+	if o.Status == "PROCESSED" {
+		_, err = txUpdateOrder.ExecContext(r.ctx, o.ID, o.Status, o.Accrual)
+		if err != nil {
+			return fmt.Errorf("failed to update order - %s", err.Error())
+		}
+		b := &entity.Balance{}
+		row := txGetBalance.QueryRowContext(r.ctx, o.UserID)
+		err = row.Scan(&b.UserID, &b.Current, &b.Withdrawn)
+		if err != nil {
+			return fmt.Errorf("failed to get user balance - %s", err.Error())
+		}
+		current := b.Current + o.Accrual
+		_, err = txUpdateBalance.ExecContext(r.ctx, b.UserID, current, b.Withdrawn)
+		if err != nil {
+			return fmt.Errorf("failed to update user balance - %s", err.Error())
+		}
+	} else {
+		_, err = txUpdateOrder.ExecContext(r.ctx, o.ID, o.Status, o.Accrual)
+		if err != nil {
+			return fmt.Errorf("failed to update order - %s", err.Error())
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("update order transaction failed - %s", err.Error())
+	}
+	return nil
+}
