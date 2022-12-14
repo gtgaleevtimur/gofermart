@@ -30,6 +30,7 @@ func Run() {
 		Handler: handler.NewRouter(repository),
 	}
 	go func() {
+		<-sig
 		shutdownCtx, shutdownCtxCancel := context.WithTimeout(context.Background(), time.Second*20)
 		defer shutdownCtxCancel()
 		go func() {
