@@ -265,6 +265,53 @@ func (r *Repository) GetBalance(userID uint64) (*entity.BalanceX, error) {
 	return blx, nil
 }
 
+func (r *Repository) PostWithdraw(wd *entity.WithdrawX) error {
+	orderID, err := strconv.Atoi(wd.Order)
+	if err != nil {
+		return ErrOrderInvalidFormat
+	}
+
+	withdraw := &entity.Withdraw{
+		OrderID: uint64(orderID),
+		UserID:  wd.UserID,
+		Sum:     uint64(wd.Sum * 100),
+	}
+
+	strOrderID := strconv.Itoa(int(withdraw.OrderID))
+	if !loon.IsValid(strOrderID) {
+		return ErrOrderInvalidFormat
+	}
+
+	err = r.AddWithdrawDB(withdraw)
+	if err != nil {
+		return err
+	}
+	r.balanceMemory.Lock()
+	delete(r.balanceMemory.ByUserID, withdraw.UserID)
+	r.balanceMemory.Unlock()
+	return nil
+}
+
+func (r *Repository) GetWithdrawals(userID uint64) ([]*entity.WithdrawX, error) {
+	wds, err := r.GetWithdrawalsDB(userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(wds) == 0 {
+		return nil, ErrNoContent
+	}
+	wdx := make([]*entity.WithdrawX, len(wds))
+	for _, v := range wds {
+		wpr := &entity.WithdrawX{
+			Order:       fmt.Sprint(v.OrderID),
+			Sum:         float64(v.Sum) / 100,
+			ProcessedAt: v.ProcessedAt.Format(time.RFC3339),
+		}
+		wdx = append(wdx, wpr)
+	}
+	return wdx, nil
+}
+
 func HashPass(password string) ([]byte, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
 	if err != nil {

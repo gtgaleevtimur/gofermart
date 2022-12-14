@@ -32,7 +32,7 @@ func NewRouter(r *repository.Repository) chi.Router {
 		rout.Get("/balance", controller.GetBalance)
 
 		rout.Post("/balance/withdraw", controller.PostWithdraw)
-		rout.Get("/balance/withdrawals", controller.GetWithdrawals)
+		rout.Get("/withdrawals", controller.GetWithdrawals)
 	})
 
 	router.NotFound(NotFound())
