@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/rs/zerolog/log"
+	"reflect"
 	"time"
 )
 
@@ -135,6 +136,9 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error)
 		}
 		if w.ProcessedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
+		}
+		if reflect.ValueOf(w).IsZero() {
+			continue
 		}
 		ws = append(ws, &w)
 	}
