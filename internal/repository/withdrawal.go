@@ -127,7 +127,7 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var w *entity.Withdraw
+		var w entity.Withdraw
 		date := new(string)
 		err = rows.Scan(&w.OrderID, &w.UserID, &w.Sum, date)
 		if err != nil {
@@ -136,10 +136,7 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error)
 		if w.ProcessedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
 		}
-		if w == nil {
-			continue
-		}
-		ws = append(ws, w)
+		ws = append(ws, &w)
 	}
 
 	return ws, nil

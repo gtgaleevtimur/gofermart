@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
-	"github.com/rs/zerolog/log"
 	"net/http"
 )
 
@@ -29,16 +28,12 @@ func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	r1, _ := json.Marshal(&wdx[0])
-	r2, _ := json.Marshal(&wdx[1])
-	//wdx = wdx[1:]
+	wdx = wdx[1:]
 	body, err := json.Marshal(&wdx)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to marshal JSON - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-	log.Debug().Int("Len:", len(wdx)).Str("0", string(r1)).Str("1", string(r2)).Msg(string(body))
-	//w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", ContentTypeApplicationJSON)
 	w.Write(body)
 }
