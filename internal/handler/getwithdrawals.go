@@ -31,7 +31,7 @@ func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	}
 	r1, _ := json.Marshal(&wdx[0])
 	r2, _ := json.Marshal(&wdx[1])
-	wdx = wdx[1:]
+	//wdx = wdx[1:]
 	body, err := json.Marshal(&wdx)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to marshal JSON - %s", err.Error()), http.StatusInternalServerError)

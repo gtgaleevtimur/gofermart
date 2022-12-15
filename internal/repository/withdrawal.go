@@ -137,7 +137,7 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error)
 		if w.ProcessedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
 		}
-		if reflect.ValueOf(w).IsZero() || reflect.DeepEqual(w, entity.Withdraw{}) {
+		if reflect.ValueOf(w).IsNil() {
 			continue
 		}
 		ws = append(ws, &w)
