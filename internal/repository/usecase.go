@@ -300,7 +300,6 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]*entity.WithdrawX, error) 
 	if len(wds) == 0 {
 		return nil, ErrNoContent
 	}
-	log.Warn().Int("LEN WDS:", len(wds))
 	wdx := make([]*entity.WithdrawX, len(wds))
 	for _, v := range wds {
 		wpr := &entity.WithdrawX{
