@@ -34,8 +34,7 @@ func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, fmt.Errorf("failed to marshal JSON - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-	log.Warn().Int("LEN WDS", len(wdx))
-	log.Warn().Msg(string(body))
+	log.Warn().Int("Len:", len(wdx)).Msg(string(body))
 	//w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", ContentTypeApplicationJSON)
 	w.Write(body)
