@@ -10,12 +10,12 @@ import (
 
 func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	var err error
-	cl := r.Header.Get("Content-Length")
-	if cl != "0" {
-		err = fmt.Errorf("wrong content length")
-		c.error(w, r, err, http.StatusBadRequest)
-		return
-	}
+	//	cl := r.Header.Get("Content-Length")
+	//	if cl != "0" {
+	//		err = fmt.Errorf("wrong content length")
+	//		c.error(w, r, err, http.StatusBadRequest)
+	//		return
+	//	}
 	st, err := c.auth(w, r)
 	if err != nil {
 		return
