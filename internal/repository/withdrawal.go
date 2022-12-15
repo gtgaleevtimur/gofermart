@@ -51,7 +51,7 @@ func (r *Repository) initWithdrawalsStatements() error {
 
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
-		"SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY processed_at desc",
+		"SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY processed_at DESC",
 	)
 	if err != nil {
 		return err
