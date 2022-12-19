@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -313,9 +312,6 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 			ProcessedAt: v.ProcessedAt.Format(time.RFC3339),
 		}
 		if wpr.Order == "" || wpr.Sum == 0 || wpr.ProcessedAt == "" {
-			continue
-		}
-		if reflect.DeepEqual(wpr, entity.WithdrawX{}) {
 			continue
 		}
 		wdx = append(wdx, wpr)
