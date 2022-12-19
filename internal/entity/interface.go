@@ -1,22 +1,32 @@
 package entity
 
 type Storager interface {
-	AddWithdrawDB(withdraw *Withdraw) error
-	GetWithdrawalsDB(userID uint64) ([]Withdraw, error)
+	Databaser
+	Querer
+	Controlluser
+}
 
-	AddUserDB(user *User) (uint64, error)
-	GetUserDB(byKey interface{}) (*User, error)
-
+type Databaser interface {
+	GetBalanceDB(userID uint64) (Balance, error)
+	GetOrderDB(orderID uint64) (Order, error)
+	AddOrderDB(o *Order) error
+	GetOrdersDB(id uint64) ([]Order, error)
+	GetPullOrders(limit uint32) (map[uint64]Order, error)
 	DeleteSessionDB(token string) error
 	AddSessionDB(session *Session) error
 	GetSessionDB(token string) (Session, error)
+	AddUserDB(u *User) (uint64, error)
+	GetUserDB(byKey interface{}) (User, error)
+	AddWithdrawDB(withdraw *Withdraw) error
+	GetWithdrawalsDB(userID uint64) ([]Withdraw, error)
+}
 
-	GetOrderDB(orderID uint64) (*Order, error)
-	AddOrderDB(order *Order) error
-	GetOrdersDB(id uint64) ([]Order, error)
+type Querer interface {
+	GetPullOrders(limit uint32) (map[uint64]Order, error)
+	UpdateOrder(o Order) error
+}
 
-	GetBalanceDB(userID uint64) (*Balance, error)
-
+type Controlluser interface {
 	Register(accInfo *AccountInfo) (*Session, error)
 	Login(accInfo *AccountInfo, oldToken string) (*Session, error)
 	AddSession(session *Session) error
@@ -30,7 +40,4 @@ type Storager interface {
 	GetBalance(userID uint64) (*BalanceX, error)
 	PostWithdraw(wd *WithdrawX) error
 	GetWithdrawals(userID uint64) ([]*WithdrawX, error)
-
-	GetPullOrders(limit uint32) (map[uint64]Order, error)
-	UpdateOrder(order Order) error
 }
