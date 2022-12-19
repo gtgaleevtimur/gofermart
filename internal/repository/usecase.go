@@ -315,7 +315,7 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 		if wpr.Order == "" || wpr.Sum == 0 || wpr.ProcessedAt == "" {
 			continue
 		}
-		if reflect.ValueOf(wpr).IsNil() {
+		if reflect.DeepEqual(wpr, entity.WithdrawX{}) {
 			continue
 		}
 		wdx = append(wdx, wpr)
