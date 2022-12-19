@@ -305,7 +305,7 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 	if len(wds) == 0 {
 		return nil, ErrNoContent
 	}
-	wdx := make([]entity.WithdrawX, len(wds))
+	wdx := make([]entity.WithdrawX, 0)
 	for _, v := range wds {
 		wpr := entity.WithdrawX{
 			Order:       fmt.Sprint(v.OrderID),
