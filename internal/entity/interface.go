@@ -39,5 +39,5 @@ type Controlluser interface {
 	GetOrders(userID uint64) ([]*OrderX, error)
 	GetBalance(userID uint64) (*BalanceX, error)
 	PostWithdraw(wd *WithdrawX) error
-	GetWithdrawals(userID uint64) ([]*WithdrawX, error)
+	GetWithdrawals(userID uint64) ([]WithdrawX, error)
 }

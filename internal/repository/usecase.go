@@ -296,7 +296,7 @@ func (r *Repository) PostWithdraw(wd *entity.WithdrawX) error {
 	return nil
 }
 
-func (r *Repository) GetWithdrawals(userID uint64) ([]*entity.WithdrawX, error) {
+func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 	wds, err := r.GetWithdrawalsDB(userID)
 	if err != nil {
 		return nil, err
@@ -304,12 +304,15 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]*entity.WithdrawX, error) 
 	if len(wds) == 0 {
 		return nil, ErrNoContent
 	}
-	wdx := make([]*entity.WithdrawX, len(wds))
+	wdx := make([]entity.WithdrawX, len(wds))
 	for _, v := range wds {
-		wpr := &entity.WithdrawX{
+		wpr := entity.WithdrawX{
 			Order:       fmt.Sprint(v.OrderID),
 			Sum:         float64(v.Sum) / 100,
 			ProcessedAt: v.ProcessedAt.Format(time.RFC3339),
+		}
+		if wpr.Order == "" || wpr.Sum == 0 || wpr.ProcessedAt == "" {
+			continue
 		}
 		wdx = append(wdx, wpr)
 	}
