@@ -10,6 +10,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
+// Login - обработчик аутентификации пользователя.
 func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 	var creds *entity.AccountInfo
 	err := json.NewDecoder(r.Body).Decode(&creds)
@@ -17,13 +18,11 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, err, http.StatusBadRequest)
 		return
 	}
-
 	var sessionToken string
 	st, err := r.Cookie("session_token")
 	if err == nil {
 		sessionToken = st.Value
 	}
-
 	session, err := c.Storage.Login(creds, sessionToken)
 	if err != nil {
 		if errors.Is(err, repository.ErrInvalidPair) || errors.Is(err, repository.ErrUserNotFound) {
@@ -37,7 +36,6 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, fmt.Errorf("got nil session"), http.StatusInternalServerError)
 		return
 	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   session.Token,

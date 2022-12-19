@@ -23,15 +23,14 @@ func (r *Repository) initWithdrawals(ctx context.Context) error {
 		return err
 	}
 	log.Debug().Msg("table withdrawals created")
-
 	err = r.initWithdrawalsStatements()
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
+// initWithdrawalsStatements - метод, подготавливающий стейтменты БД для работы с таблицей списаний пользователей.
 func (r *Repository) initWithdrawalsStatements() error {
 	stmt, err := r.db.PrepareContext(
 		r.ctx,
@@ -41,7 +40,6 @@ func (r *Repository) initWithdrawalsStatements() error {
 		return err
 	}
 	r.stmts["withdrawalsInsert"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"SELECT * FROM withdrawals WHERE order_id=$1",
@@ -50,7 +48,6 @@ func (r *Repository) initWithdrawalsStatements() error {
 		return err
 	}
 	r.stmts["withdrawalsGetByID"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY processed_at DESC",
@@ -59,22 +56,20 @@ func (r *Repository) initWithdrawalsStatements() error {
 		return err
 	}
 	r.stmts["withdrawalsGetForUser"] = stmt
-
 	return nil
 }
 
+// AddWithdrawDB - метод, добавляющий списание баллов лояльности пользователя в БД.
 func (r *Repository) AddWithdrawDB(withdraw *entity.Withdraw) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-
 	txGetByID := tx.StmtContext(r.ctx, r.stmts["withdrawalsGetByID"])
 	txInsertWithdrawal := tx.StmtContext(r.ctx, r.stmts["withdrawalsInsert"])
 	txGetBalance := tx.StmtContext(r.ctx, r.stmts["balanceGet"])
 	txUpdateBalance := tx.StmtContext(r.ctx, r.stmts["balanceUpdate"])
-
 	var balance entity.Balance
 	row := txGetBalance.QueryRowContext(r.ctx, withdraw.UserID)
 	err = row.Scan(&balance.UserID, &balance.Current, &balance.Withdrawn)
@@ -118,6 +113,7 @@ func (r *Repository) AddWithdrawDB(withdraw *entity.Withdraw) error {
 	return fmt.Errorf("withdraw already recorded by another user")
 }
 
+// GetWithdrawalsDB - метод, возвращающий сделанные пользователем списания с баланса системы лояльности из БД по его ID.
 func (r *Repository) GetWithdrawalsDB(userID uint64) ([]entity.Withdraw, error) {
 	ws := make([]entity.Withdraw, 0)
 	rows, err := r.stmts["withdrawalsGetForUser"].QueryContext(r.ctx, userID)
@@ -140,6 +136,5 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]entity.Withdraw, error) 
 		}
 		ws = append(ws, w)
 	}
-
 	return ws, nil
 }

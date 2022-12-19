@@ -24,6 +24,7 @@ type User struct {
 	Password []byte
 }
 
+// CheckPassword - функция, проверяющая пароль на соответствие.
 func (u *User) CheckPassword(password string) bool {
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(password)); err != nil {
 		return false
@@ -32,6 +33,7 @@ func (u *User) CheckPassword(password string) bool {
 	return true
 }
 
+// NewUsers - конструктор,хэш-таблицы пользователей.
 func NewUsers() *UsersMemory {
 	return &UsersMemory{
 		ByLogin: make(map[string]User),
@@ -45,6 +47,7 @@ type Session struct {
 	Expiry time.Time
 }
 
+// IsExpired - метод, проверяющий срок годности cookie.
 func (s *Session) IsExpired() bool {
 	return s.Expiry.Before(time.Now())
 }
@@ -54,6 +57,7 @@ type SessionMemory struct {
 	BySessionToken map[string]Session
 }
 
+// NewSessions - конструктор хэш-таблицы сессии пользователей.
 func NewSessions() *SessionMemory {
 	return &SessionMemory{
 		BySessionToken: make(map[string]Session),
@@ -65,6 +69,7 @@ type OrdersMemory struct {
 	ByID map[uint64]Order
 }
 
+// NewOrders - конструктор хэш-таблицы заказов пользователей.
 func NewOrders() *OrdersMemory {
 	return &OrdersMemory{
 		ByID: make(map[uint64]Order),
@@ -97,6 +102,7 @@ type BalanceMemory struct {
 	ByUserID map[uint64]Balance
 }
 
+// NewBalance - конструктор хэш-таблицы балансов пользователей.
 func NewBalance() *BalanceMemory {
 	return &BalanceMemory{
 		ByUserID: make(map[uint64]Balance),

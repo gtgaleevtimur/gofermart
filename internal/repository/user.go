@@ -21,7 +21,6 @@ func (r *Repository) initUsers(ctx context.Context) error {
 		return err
 	}
 	log.Debug().Msg("table users created")
-
 	err = r.initUsersStatements()
 	if err != nil {
 		return err
@@ -39,7 +38,6 @@ func (r *Repository) initUsersStatements() error {
 		return err
 	}
 	r.stmts["usersInsert"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"SELECT * FROM users WHERE login=$1",
@@ -48,7 +46,6 @@ func (r *Repository) initUsersStatements() error {
 		return err
 	}
 	r.stmts["usersGetByLogin"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"SELECT * FROM users WHERE id=$1",
@@ -57,7 +54,6 @@ func (r *Repository) initUsersStatements() error {
 		return err
 	}
 	r.stmts["usersGetByID"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"DELETE FROM users WHERE login=$1",
@@ -66,7 +62,6 @@ func (r *Repository) initUsersStatements() error {
 		return err
 	}
 	r.stmts["usersDelete"] = stmt
-
 	return nil
 }
 
@@ -77,11 +72,9 @@ func (r *Repository) AddUserDB(u *entity.User) (uint64, error) {
 		return 0, err
 	}
 	defer tx.Rollback()
-
 	txInsert := tx.StmtContext(r.ctx, r.stmts["usersInsert"])
 	txGet := tx.StmtContext(r.ctx, r.stmts["usersGetByLogin"])
 	txInsertBalance := tx.StmtContext(r.ctx, r.stmts["balanceInsert"])
-
 	row := txGet.QueryRowContext(r.ctx, u.Login)
 	blankUser := entity.User{}
 	err = row.Scan(&blankUser.ID, &blankUser.Login, &blankUser.Password)
@@ -90,32 +83,28 @@ func (r *Repository) AddUserDB(u *entity.User) (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-
 		row = txGet.QueryRowContext(r.ctx, u.Login)
 		err = row.Scan(&u.ID, &u.Login, &u.Password)
 		if err != nil {
 			return 0, err
 		}
-
 		_, err = txInsertBalance.ExecContext(r.ctx, u.ID)
 		if err != nil {
 			return 0, err
 		}
-
 	} else if err != nil {
 		return 0, err
 	} else {
 		return 0, ErrLoginAlreadyTaken
 	}
-
 	err = tx.Commit()
 	if err != nil {
 		return 0, fmt.Errorf("add user transaction failed - %s", err.Error())
 	}
-
 	return u.ID, nil
 }
 
+// GetUserDB - метод, возвращающий информацию о пользователе из таблицы пользователей.
 func (r *Repository) GetUserDB(byKey interface{}) (entity.User, error) {
 	var u entity.User
 	tx, err := r.db.Begin()
@@ -123,12 +112,9 @@ func (r *Repository) GetUserDB(byKey interface{}) (entity.User, error) {
 		return u, err
 	}
 	defer tx.Rollback()
-
 	txGetByLogin := tx.StmtContext(r.ctx, r.stmts["usersGetByLogin"])
 	txGetByID := tx.StmtContext(r.ctx, r.stmts["usersGetByID"])
-
 	var row *sql.Row
-
 	switch key := byKey.(type) {
 	case string:
 		row = txGetByLogin.QueryRowContext(r.ctx, key)
@@ -137,7 +123,6 @@ func (r *Repository) GetUserDB(byKey interface{}) (entity.User, error) {
 	default:
 		return u, fmt.Errorf("given type not implemented")
 	}
-
 	err = row.Scan(&u.ID, &u.Login, &u.Password)
 	if err == sql.ErrNoRows {
 		return u, ErrUserNotFound
@@ -145,7 +130,6 @@ func (r *Repository) GetUserDB(byKey interface{}) (entity.User, error) {
 	if err != nil {
 		return u, err
 	}
-
 	err = tx.Commit()
 	if err != nil {
 		return u, fmt.Errorf("get user transaction failed - %s", err.Error())

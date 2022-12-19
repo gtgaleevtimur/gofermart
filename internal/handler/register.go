@@ -11,7 +11,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
-// Register - обработчик, регистрирующий нового пользователя.
+// Register - обработчик регистрации нового пользователя.
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	content := r.Header.Get("Content-Type")
 	if content != "application/json" {
@@ -45,14 +45,11 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, fmt.Errorf("got nil session"), http.StatusInternalServerError)
 		return
 	}
-
-	// создадим куку со сроком годности
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   session.Token,
 		Expires: session.Expiry,
 	})
-
 	msg := fmt.Sprintf("session for user `%s` successfully created", accInfo.Login)
 	c.log(r, msg)
 }

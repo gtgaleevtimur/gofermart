@@ -9,6 +9,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
+// GetWithdrawals - обработчик обрабатывающий запрос на  получение информации о выводе средств с накопительного счёта пользователем.
 func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	var err error
 	st, err := c.auth(w, r)

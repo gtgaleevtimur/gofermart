@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// log - хэлпер-логгер.
 func (c *Controller) log(r *http.Request, msg string) {
 	reqID := middleware.GetReqID(r.Context())
 	if reqID != "" {

@@ -20,9 +20,7 @@ func (r *Repository) initBalance(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
 	log.Debug().Msg("table balance created")
-
 	err = r.initBalanceStatements()
 	if err != nil {
 		return err
@@ -30,6 +28,7 @@ func (r *Repository) initBalance(ctx context.Context) error {
 	return nil
 }
 
+// initBalanceStatements - метод, подготавливающий стейтменты для работы с таблицей балансов пользователей.
 func (r *Repository) initBalanceStatements() error {
 	stmt, err := r.db.PrepareContext(
 		r.ctx,
@@ -39,7 +38,6 @@ func (r *Repository) initBalanceStatements() error {
 		return err
 	}
 	r.stmts["balanceInsert"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"SELECT * FROM balance WHERE user_id=$1",
@@ -48,7 +46,6 @@ func (r *Repository) initBalanceStatements() error {
 		return err
 	}
 	r.stmts["balanceGet"] = stmt
-
 	stmt, err = r.db.PrepareContext(
 		r.ctx,
 		"UPDATE balance SET current = $2, withdrawn = $3 WHERE user_id = $1",
@@ -57,10 +54,10 @@ func (r *Repository) initBalanceStatements() error {
 		return err
 	}
 	r.stmts["balanceUpdate"] = stmt
-
 	return nil
 }
 
+// GetBalanceDB - метод, возвращающий баланс пользователя по его ID.
 func (r *Repository) GetBalanceDB(userID uint64) (entity.Balance, error) {
 	b := entity.Balance{}
 	row := r.stmts["balanceGet"].QueryRowContext(r.ctx, userID)

@@ -9,9 +9,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// error - обработчик-хелпер, пишущий ошибки.
 func (c *Controller) error(w http.ResponseWriter, r *http.Request, err error, statusCode int) {
 	reqID := middleware.GetReqID(r.Context())
-
 	type errorJSON struct {
 		Error      string
 		StatusCode int
@@ -20,12 +20,10 @@ func (c *Controller) error(w http.ResponseWriter, r *http.Request, err error, st
 		Error:      err.Error(),
 		StatusCode: statusCode,
 	}
-
 	prefix := "[ERROR]"
 	if reqID != "" {
 		prefix = fmt.Sprintf("[%s] [ERROR]", reqID)
 	}
-
 	b, errMarshal := json.Marshal(e)
 	if errMarshal != nil {
 		msg := fmt.Sprintf("Failed to marshal error - %s, StatusCode: 500", err.Error())
@@ -33,7 +31,6 @@ func (c *Controller) error(w http.ResponseWriter, r *http.Request, err error, st
 		log.Info().Str(prefix, msg)
 		return
 	}
-
 	w.Header().Set("Content-Type", ContentTypeApplicationJSON)
 	w.WriteHeader(statusCode)
 	w.Write(b)

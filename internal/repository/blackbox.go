@@ -39,6 +39,7 @@ type blackboxOrderX struct {
 	Accrual float64 `json:"accrual"`
 }
 
+// Do - метод, обновляющий баланс пользователя / статус заказов.
 func (bo *blackboxOrder) Do() error {
 	ctx, cancel := context.WithTimeout(bo.ctx, 60*time.Second)
 	defer cancel()
@@ -103,6 +104,7 @@ func NewBlackbox(st entity.Storager, addr string) *Blackbox {
 	}
 }
 
+// Start - запуск сервиса для обновления балансов.
 func (b *Blackbox) Start() {
 	rand.Seed(time.Now().UnixNano())
 	ctx, cancel := context.WithCancel(context.Background())
@@ -119,7 +121,6 @@ func (b *Blackbox) Start() {
 func (b *Blackbox) run(ctx context.Context) {
 	for {
 		b.updatePool()
-
 		g, _ := errgroup.WithContext(ctx)
 		for _, order := range b.pool {
 			w := &blackboxOrder{Blackbox: b, ctx: ctx, order: order}
@@ -150,6 +151,7 @@ func (b *Blackbox) run(ctx context.Context) {
 	}
 }
 
+// updatePool - метод, обновляющий очередь заказов в статусе PROCESSING.
 func (b *Blackbox) updatePool() {
 	limit := atomic.LoadUint32(&b.limit)
 	ors, err := b.storage.GetPullOrders(limit)
@@ -170,6 +172,7 @@ func (b *Blackbox) updatePool() {
 	log.Debug().Int("length of pool", len(b.pool)).Msg("Orders pool updated, now in pool")
 }
 
+// isValidStatus - функция соответствия статуса.
 func isValidStatus(status string) bool {
 	switch status {
 	case "NEW":

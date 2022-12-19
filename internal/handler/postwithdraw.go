@@ -11,6 +11,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
+// PostWithdraw - обработчик запроса на списание баллов с накопительного счета пользователя в счет оплаты нового заказа.
 func (c *Controller) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 	var err error
 	ct := r.Header.Get("Content-Type")
@@ -19,7 +20,6 @@ func (c *Controller) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, err, http.StatusBadRequest)
 		return
 	}
-
 	st, err := c.auth(w, r)
 	if err != nil {
 		return
@@ -29,21 +29,18 @@ func (c *Controller) PostWithdraw(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, fmt.Errorf("failed to get user by ID - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
-
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to read request body - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
-
 	wd := &entity.WithdrawX{}
 	err = json.Unmarshal(reqBody, &wd)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to unmarshal body - %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-
 	wd.UserID = u.ID
 	err = c.Storage.PostWithdraw(wd)
 	if err != nil {

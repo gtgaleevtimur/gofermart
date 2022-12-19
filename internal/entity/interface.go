@@ -1,11 +1,13 @@
 package entity
 
+// Storager - сборный интерфейс бога сервиса.
 type Storager interface {
 	Databaser
 	Querer
 	Controlluser
 }
 
+// Databaser - интерфейс, отвечающий за работу с БД.
 type Databaser interface {
 	GetBalanceDB(userID uint64) (Balance, error)
 	GetOrderDB(orderID uint64) (Order, error)
@@ -21,11 +23,13 @@ type Databaser interface {
 	GetWithdrawalsDB(userID uint64) ([]Withdraw, error)
 }
 
+// Querer - интерфейс, отвечающий за работу с blackbox.
 type Querer interface {
 	GetPullOrders(limit uint32) (map[uint64]Order, error)
 	UpdateOrder(o Order) error
 }
 
+// Controlluser - интерфейс, отвечающий за методы контроллера хэндлера.
 type Controlluser interface {
 	Register(accInfo *AccountInfo) (*Session, error)
 	Login(accInfo *AccountInfo, oldToken string) (*Session, error)

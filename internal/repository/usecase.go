@@ -30,7 +30,6 @@ func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, err
 		Login:    accInfo.Login,
 		Password: hashedPassword,
 	}
-
 	id, err := r.AddUserDB(u)
 	if err != nil {
 		return nil, err
@@ -40,7 +39,6 @@ func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, err
 	r.userMemory.ByLogin[u.Login] = *u
 	r.userMemory.ByID[u.ID] = *u
 	r.userMemory.Unlock()
-
 	session, err := r.Login(accInfo, "")
 	if err != nil {
 		return nil, err
@@ -58,14 +56,12 @@ func (r *Repository) Login(accInfo *entity.AccountInfo, oldToken string) (*entit
 	if !check {
 		return nil, ErrInvalidPair
 	}
-
 	if oldToken != "" {
 		err = r.DeleteSession(oldToken)
 		if err != nil {
 			log.Error().Err(err)
 		}
 	}
-
 	newToken := uuid.NewString()
 	expiresAt := time.Now().Add(600 * time.Second)
 
@@ -78,10 +74,10 @@ func (r *Repository) Login(accInfo *entity.AccountInfo, oldToken string) (*entit
 	if err != nil {
 		return nil, err
 	}
-
 	return s, nil
 }
 
+// AddSession - метод добавляющий пользователя в хэш-таблицу и БД.
 func (r *Repository) AddSession(session *entity.Session) error {
 	r.sessionMemory.RLock()
 	_, ok := r.sessionMemory.BySessionToken[session.Token]
@@ -89,22 +85,19 @@ func (r *Repository) AddSession(session *entity.Session) error {
 	if ok {
 		return fmt.Errorf("session already exists")
 	}
-
 	err := r.AddSessionDB(session)
 	if err != nil {
 		return err
 	}
-
 	r.sessionMemory.Lock()
 	r.sessionMemory.BySessionToken[session.Token] = *session
 	r.sessionMemory.Unlock()
-
 	return nil
 }
 
+// GetSession - метод, возвращающий сессию пользователя из хэш-памяти или БД.
 func (r *Repository) GetSession(token string) (*entity.Session, error) {
 	var err error
-
 	r.sessionMemory.RLock()
 	session, ok := r.sessionMemory.BySessionToken[token]
 	r.sessionMemory.RUnlock()
@@ -113,33 +106,30 @@ func (r *Repository) GetSession(token string) (*entity.Session, error) {
 		if err != nil {
 			return nil, fmt.Errorf("token session not found - %s", err.Error())
 		}
-
 		r.sessionMemory.Lock()
 		r.sessionMemory.BySessionToken[session.Token] = session
 		r.sessionMemory.Unlock()
 	}
-
 	return &session, nil
 }
 
+// DeleteSession - метод, удаляющий сессию пользователя из хэш-таблицы и БД.
 func (r *Repository) DeleteSession(token string) error {
 	r.sessionMemory.Lock()
 	delete(r.sessionMemory.BySessionToken, token)
 	r.sessionMemory.Unlock()
-
 	err := r.DeleteSessionDB(token)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
+// GetUser - метод, возвращающий информацию о пользователе из хэш-таблицы или БД.
 func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 	var err error
 	var u entity.User
 	var ok bool
-
 	r.userMemory.RLock()
 	switch key := byKey.(type) {
 	case string:
@@ -151,7 +141,6 @@ func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 		return nil, fmt.Errorf("given type not implemented")
 	}
 	r.userMemory.RUnlock()
-
 	if !ok {
 		u, err = r.GetUserDB(byKey)
 		if err != nil {
@@ -163,10 +152,10 @@ func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 		r.userMemory.ByID[u.ID] = u
 		r.userMemory.Unlock()
 	}
-
 	return &u, nil
 }
 
+// PostOrders - метод, регистрирующий заказ пользователя в хэш-таблице или БД.
 func (r *Repository) PostOrders(orderID, userID uint64) error {
 	err := r.AddOrders(orderID, userID)
 	if err != nil {
@@ -176,12 +165,12 @@ func (r *Repository) PostOrders(orderID, userID uint64) error {
 	return nil
 }
 
+// AddOrders - хэлпер метода PostOrders.
 func (r *Repository) AddOrders(orderID, userID uint64) error {
 	strOrderID := strconv.Itoa(int(orderID))
 	if !loon.IsValid(strOrderID) {
 		return ErrOrderInvalidFormat
 	}
-
 	order, _ := r.GetOrder(orderID)
 	if order != nil {
 		if order.UserID == userID {
@@ -189,7 +178,6 @@ func (r *Repository) AddOrders(orderID, userID uint64) error {
 		}
 		return ErrOrderAlreadyLoadedByAnotherUser
 	}
-
 	order = &entity.Order{
 		ID:         orderID,
 		UserID:     userID,
@@ -200,17 +188,15 @@ func (r *Repository) AddOrders(orderID, userID uint64) error {
 	if err != nil {
 		return err
 	}
-
 	r.ordersMemory.Lock()
 	r.ordersMemory.ByID[orderID] = *order
 	r.ordersMemory.Unlock()
-
 	return nil
 }
 
+// GetOrder - метод, возвращающий информацию о заказе по его номеру из хэш-таблицы или БД.
 func (r *Repository) GetOrder(orderID uint64) (*entity.Order, error) {
 	var err error
-
 	r.ordersMemory.RLock()
 	o, ok := r.ordersMemory.ByID[orderID]
 	r.ordersMemory.RUnlock()
@@ -223,17 +209,16 @@ func (r *Repository) GetOrder(orderID uint64) (*entity.Order, error) {
 		r.ordersMemory.ByID[orderID] = o
 		r.ordersMemory.Unlock()
 	}
-
 	return &o, nil
 }
 
+// GetOrders - метод, возвращающий все заказы пользователя по его ID из БД.
 func (r *Repository) GetOrders(userID uint64) ([]*entity.OrderX, error) {
 	ors, err := r.GetOrdersDB(userID)
 	if err != nil {
 		return nil, err
 	}
 	layout := "2006-01-02T15:04:05-07:00"
-
 	orsPr := make([]*entity.OrderX, 0)
 	for _, o := range ors {
 		po := &entity.OrderX{
@@ -247,6 +232,7 @@ func (r *Repository) GetOrders(userID uint64) ([]*entity.OrderX, error) {
 	return orsPr, nil
 }
 
+// GetBalance - метод, возвращающий баланс системы лояльности пользователя из хэш-таблицы или БД по его ID.
 func (r *Repository) GetBalance(userID uint64) (*entity.BalanceX, error) {
 	var err error
 	r.balanceMemory.RLock()
@@ -265,27 +251,24 @@ func (r *Repository) GetBalance(userID uint64) (*entity.BalanceX, error) {
 		Current:   float64(b.Current) / 100,
 		Withdrawn: float64(b.Withdrawn) / 100,
 	}
-
 	return blx, nil
 }
 
+// PostWithdraw - метод, регистрирующий новое списание из системы лояльности пользователем.
 func (r *Repository) PostWithdraw(wd *entity.WithdrawX) error {
 	orderID, err := strconv.Atoi(wd.Order)
 	if err != nil {
 		return ErrOrderInvalidFormat
 	}
-
 	withdraw := &entity.Withdraw{
 		OrderID: uint64(orderID),
 		UserID:  wd.UserID,
 		Sum:     uint64(wd.Sum * 100),
 	}
-
 	strOrderID := strconv.Itoa(int(withdraw.OrderID))
 	if !loon.IsValid(strOrderID) {
 		return ErrOrderInvalidFormat
 	}
-
 	err = r.AddWithdrawDB(withdraw)
 	if err != nil {
 		return err
@@ -296,6 +279,7 @@ func (r *Repository) PostWithdraw(wd *entity.WithdrawX) error {
 	return nil
 }
 
+// GetWithdrawals - метод, возвращающий все списания пользователем из системы по его ID.
 func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 	wds, err := r.GetWithdrawalsDB(userID)
 	if err != nil {
@@ -319,11 +303,11 @@ func (r *Repository) GetWithdrawals(userID uint64) ([]entity.WithdrawX, error) {
 	return wdx, nil
 }
 
+// HashPass - функция, хэширующая пароль пользователя.
 func HashPass(password string) ([]byte, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
 	if err != nil {
 		return nil, err
 	}
-
 	return hashedPassword, nil
 }

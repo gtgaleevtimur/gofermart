@@ -8,7 +8,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
-// auth - обработчик, проверяющий
+// auth - обработчик, авторизирующий пользовтаеля и его сессию.
 func (c *Controller) auth(w http.ResponseWriter, r *http.Request) (*entity.Session, error) {
 	st, err := r.Cookie("session_token")
 	if err != nil {
@@ -20,20 +20,17 @@ func (c *Controller) auth(w http.ResponseWriter, r *http.Request) (*entity.Sessi
 		return nil, err
 	}
 	sessionToken := st.Value
-
 	session, err := c.Storage.GetSession(sessionToken)
 	if err != nil {
 		err = fmt.Errorf("session token is not present")
 		c.error(w, r, err, http.StatusUnauthorized)
 		return nil, err
 	}
-
 	if session.IsExpired() {
 		c.Storage.DeleteSession(sessionToken)
 		err = fmt.Errorf("session has expired")
 		c.error(w, r, err, http.StatusUnauthorized)
 		return nil, err
 	}
-
 	return session, nil
 }
