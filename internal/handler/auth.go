@@ -2,9 +2,10 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
-	"net/http"
 )
 
 func (c *Controller) auth(w http.ResponseWriter, r *http.Request) (*entity.Session, error) {

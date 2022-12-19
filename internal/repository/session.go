@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
+
 	"github.com/rs/zerolog/log"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 // initSessions - метод, создающий таблицу сессии авторизации пользователей, если ее нет. Подготавливает стейтменты для базы данных.

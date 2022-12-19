@@ -2,8 +2,9 @@ package config
 
 import (
 	"flag"
-	"github.com/caarlos0/env"
 	"log"
+
+	"github.com/caarlos0/env"
 )
 
 type Config struct {

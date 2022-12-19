@@ -2,14 +2,16 @@ package repository
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/gtgaleevtimur/gofermart/internal/loon"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
+	"github.com/gtgaleevtimur/gofermart/internal/loon"
 )
 
 func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, error) {

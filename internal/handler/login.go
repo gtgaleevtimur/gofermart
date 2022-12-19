@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
-	"net/http"
 )
 
 func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {

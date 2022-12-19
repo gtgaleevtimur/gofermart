@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/rs/zerolog/log"
 	"time"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 // initWithdrawals - метод, создающий таблицу со средствами пользователей. Подготавливает стейтменты для базы данных.

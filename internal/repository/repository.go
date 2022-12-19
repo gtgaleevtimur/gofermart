@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
 	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 type Repository struct {

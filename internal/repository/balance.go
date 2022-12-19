@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
+
 	"github.com/rs/zerolog/log"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 // initBalance - метод, создающий таблицу балансов пользователя, если ее нет. Подготавливает стейтменты для базы данных.

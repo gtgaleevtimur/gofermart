@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/v5/middleware"
+	
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"net/http"
 )
 
 const (

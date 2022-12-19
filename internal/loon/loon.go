@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// IsValid - функция, проверяющая номер на соответствие алгоритмом Луна.
 func IsValid(number string) bool {
 	digits := strings.Split(strings.ReplaceAll(number, " ", ""), "")
 	lengthOfString := len(digits)

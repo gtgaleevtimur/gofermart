@@ -4,10 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/sync/errgroup"
 	"math/rand"
 	"net/http"
 	"os"
@@ -15,6 +11,12 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 type Blackbox struct {

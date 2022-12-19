@@ -3,10 +3,11 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
 func (c *Controller) PostOrders(w http.ResponseWriter, r *http.Request) {

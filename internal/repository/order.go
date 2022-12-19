@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/rs/zerolog/log"
 	"time"
+
+	"github.com/rs/zerolog/log"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
 func (r *Repository) initOrders(ctx context.Context) error {

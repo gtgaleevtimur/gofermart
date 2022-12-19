@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	"net/http"
+
+	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
 func (c *Controller) GetWithdrawals(w http.ResponseWriter, r *http.Request) {

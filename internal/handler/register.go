@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gtgaleevtimur/gofermart/internal/entity"
-	"github.com/gtgaleevtimur/gofermart/internal/repository"
 	"io"
 	"net/http"
+
+	"github.com/gtgaleevtimur/gofermart/internal/entity"
+	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {

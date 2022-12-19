@@ -1,9 +1,10 @@
 package entity
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"sync"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AccountInfo struct {

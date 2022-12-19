@@ -3,9 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 func (c *Controller) error(w http.ResponseWriter, r *http.Request, err error, statusCode int) {
