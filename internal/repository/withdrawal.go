@@ -118,8 +118,8 @@ func (r *Repository) AddWithdrawDB(withdraw *entity.Withdraw) error {
 	return fmt.Errorf("withdraw already recorded by another user")
 }
 
-func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error) {
-	ws := make([]*entity.Withdraw, 0)
+func (r *Repository) GetWithdrawalsDB(userID uint64) ([]entity.Withdraw, error) {
+	ws := make([]entity.Withdraw, 0)
 	rows, err := r.stmts["withdrawalsGetForUser"].QueryContext(r.ctx, userID)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (r *Repository) GetWithdrawalsDB(userID uint64) ([]*entity.Withdraw, error)
 		if w.ProcessedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
 		}
-		ws = append(ws, &w)
+		ws = append(ws, w)
 	}
 
 	return ws, nil

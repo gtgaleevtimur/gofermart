@@ -87,16 +87,16 @@ func (r *Repository) AddSessionDB(session *entity.Session) error {
 	return nil
 }
 
-func (r *Repository) GetSessionDB(token string) (*entity.Session, error) {
+func (r *Repository) GetSessionDB(token string) (entity.Session, error) {
 	session := &entity.Session{}
 	row := r.stmts["sessionsGet"].QueryRowContext(r.ctx, token)
 	err := row.Scan(&session.UserID, &session.Token, &session.Expiry)
 	if err == sql.ErrNoRows {
-		return nil, ErrSessionNotFound
+		return *session, ErrSessionNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get session - %s", err.Error())
+		return *session, fmt.Errorf("failed to get session - %s", err.Error())
 	}
 
-	return session, nil
+	return *session, nil
 }

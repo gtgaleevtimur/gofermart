@@ -61,15 +61,15 @@ func (r *Repository) initBalanceStatements() error {
 	return nil
 }
 
-func (r *Repository) GetBalanceDB(userID uint64) (*entity.Balance, error) {
-	b := &entity.Balance{}
+func (r *Repository) GetBalanceDB(userID uint64) (entity.Balance, error) {
+	b := entity.Balance{}
 	row := r.stmts["balanceGet"].QueryRowContext(r.ctx, userID)
 	err := row.Scan(&b.UserID, &b.Current, &b.Withdrawn)
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("user balance not found - %s", err.Error())
+		return b, fmt.Errorf("user balance not found - %s", err.Error())
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user balance - %s", err.Error())
+		return b, fmt.Errorf("failed to get user balance - %s", err.Error())
 	}
 	return b, nil
 }

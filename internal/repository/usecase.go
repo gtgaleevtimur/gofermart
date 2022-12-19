@@ -14,6 +14,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/loon"
 )
 
+// Register - общий метод ля регистрации пользователя.
 func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, error) {
 	r.userMemory.RLock()
 	_, ok := r.userMemory.ByLogin[accInfo.Login]
@@ -36,8 +37,8 @@ func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, err
 	}
 	u.ID = id
 	r.userMemory.Lock()
-	r.userMemory.ByLogin[u.Login] = u
-	r.userMemory.ByID[u.ID] = u
+	r.userMemory.ByLogin[u.Login] = *u
+	r.userMemory.ByID[u.ID] = *u
 	r.userMemory.Unlock()
 
 	session, err := r.Login(accInfo, "")
@@ -47,6 +48,7 @@ func (r *Repository) Register(accInfo *entity.AccountInfo) (*entity.Session, err
 	return session, nil
 }
 
+// Login - метод, обновляющий сессию при авторизации пользователя и добавляющий при регистрации.
 func (r *Repository) Login(accInfo *entity.AccountInfo, oldToken string) (*entity.Session, error) {
 	user, err := r.GetUser(accInfo.Login)
 	if err != nil {
@@ -94,7 +96,7 @@ func (r *Repository) AddSession(session *entity.Session) error {
 	}
 
 	r.sessionMemory.Lock()
-	r.sessionMemory.BySessionToken[session.Token] = session
+	r.sessionMemory.BySessionToken[session.Token] = *session
 	r.sessionMemory.Unlock()
 
 	return nil
@@ -117,7 +119,7 @@ func (r *Repository) GetSession(token string) (*entity.Session, error) {
 		r.sessionMemory.Unlock()
 	}
 
-	return session, nil
+	return &session, nil
 }
 
 func (r *Repository) DeleteSession(token string) error {
@@ -135,7 +137,7 @@ func (r *Repository) DeleteSession(token string) error {
 
 func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 	var err error
-	var u *entity.User
+	var u entity.User
 	var ok bool
 
 	r.userMemory.RLock()
@@ -162,7 +164,7 @@ func (r *Repository) GetUser(byKey interface{}) (*entity.User, error) {
 		r.userMemory.Unlock()
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (r *Repository) PostOrders(orderID, userID uint64) error {
@@ -200,7 +202,7 @@ func (r *Repository) AddOrders(orderID, userID uint64) error {
 	}
 
 	r.ordersMemory.Lock()
-	r.ordersMemory.ByID[orderID] = order
+	r.ordersMemory.ByID[orderID] = *order
 	r.ordersMemory.Unlock()
 
 	return nil
@@ -222,7 +224,7 @@ func (r *Repository) GetOrder(orderID uint64) (*entity.Order, error) {
 		r.ordersMemory.Unlock()
 	}
 
-	return o, nil
+	return &o, nil
 }
 
 func (r *Repository) GetOrders(userID uint64) ([]*entity.OrderX, error) {

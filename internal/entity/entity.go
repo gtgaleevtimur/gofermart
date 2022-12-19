@@ -14,8 +14,8 @@ type AccountInfo struct {
 
 type UsersMemory struct {
 	sync.RWMutex
-	ByLogin map[string]*User
-	ByID    map[uint64]*User
+	ByLogin map[string]User
+	ByID    map[uint64]User
 }
 
 type User struct {
@@ -34,8 +34,8 @@ func (u *User) CheckPassword(password string) bool {
 
 func NewUsers() *UsersMemory {
 	return &UsersMemory{
-		ByLogin: make(map[string]*User),
-		ByID:    make(map[uint64]*User),
+		ByLogin: make(map[string]User),
+		ByID:    make(map[uint64]User),
 	}
 }
 
@@ -51,23 +51,23 @@ func (s *Session) IsExpired() bool {
 
 type SessionMemory struct {
 	sync.RWMutex
-	BySessionToken map[string]*Session
+	BySessionToken map[string]Session
 }
 
 func NewSessions() *SessionMemory {
 	return &SessionMemory{
-		BySessionToken: make(map[string]*Session),
+		BySessionToken: make(map[string]Session),
 	}
 }
 
 type OrdersMemory struct {
 	sync.RWMutex
-	ByID map[uint64]*Order
+	ByID map[uint64]Order
 }
 
 func NewOrders() *OrdersMemory {
 	return &OrdersMemory{
-		ByID: make(map[uint64]*Order),
+		ByID: make(map[uint64]Order),
 	}
 }
 
@@ -94,12 +94,12 @@ type Balance struct {
 
 type BalanceMemory struct {
 	sync.RWMutex
-	ByUserID map[uint64]*Balance
+	ByUserID map[uint64]Balance
 }
 
 func NewBalance() *BalanceMemory {
 	return &BalanceMemory{
-		ByUserID: make(map[uint64]*Balance),
+		ByUserID: make(map[uint64]Balance),
 	}
 }
 

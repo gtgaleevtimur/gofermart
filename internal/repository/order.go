@@ -90,18 +90,18 @@ func (r *Repository) initOrdersStatements() error {
 	return nil
 }
 
-func (r *Repository) GetOrderDB(orderID uint64) (*entity.Order, error) {
-	o := &entity.Order{}
+func (r *Repository) GetOrderDB(orderID uint64) (entity.Order, error) {
+	o := entity.Order{}
 	accrual := new(sql.NullInt64)
 	date := new(string)
 
 	row := r.stmts["orderGetByID"].QueryRowContext(r.ctx, orderID)
 	err := row.Scan(&o.ID, &o.UserID, &o.Status, accrual, date)
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("order not found - %s", err.Error())
+		return o, fmt.Errorf("order not found - %s", err.Error())
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get order - %s", err.Error())
+		return o, fmt.Errorf("failed to get order - %s", err.Error())
 	}
 
 	if accrual.Valid {
@@ -109,7 +109,7 @@ func (r *Repository) GetOrderDB(orderID uint64) (*entity.Order, error) {
 	}
 
 	if o.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
-		return nil, err
+		return o, err
 	}
 
 	return o, nil
@@ -154,8 +154,8 @@ func (r *Repository) AddOrderDB(o *entity.Order) error {
 	return ErrOrderAlreadyLoadedByAnotherUser
 }
 
-func (r *Repository) GetOrdersDB(id uint64) ([]*entity.Order, error) {
-	orders := make([]*entity.Order, 0)
+func (r *Repository) GetOrdersDB(id uint64) ([]entity.Order, error) {
+	orders := make([]entity.Order, 0)
 	rows, err := r.stmts["ordersGetForUser"].QueryContext(r.ctx, id)
 	if err != nil {
 		return nil, err
@@ -181,13 +181,13 @@ func (r *Repository) GetOrdersDB(id uint64) ([]*entity.Order, error) {
 		if bo.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
 		}
-		orders = append(orders, &bo)
+		orders = append(orders, bo)
 	}
 	return orders, nil
 }
 
-func (r *Repository) GetPullOrders(limit uint32) (map[uint64]*entity.Order, error) {
-	orders := make(map[uint64]*entity.Order)
+func (r *Repository) GetPullOrders(limit uint32) (map[uint64]entity.Order, error) {
+	orders := make(map[uint64]entity.Order)
 
 	rows, err := r.stmts["ordersGetForPool"].QueryContext(r.ctx, limit)
 	if err != nil {
@@ -211,12 +211,12 @@ func (r *Repository) GetPullOrders(limit uint32) (map[uint64]*entity.Order, erro
 		if bo.UploadedAt, err = time.Parse(time.RFC3339, *date); err != nil {
 			return nil, err
 		}
-		orders[bo.ID] = &bo
+		orders[bo.ID] = bo
 	}
 	return orders, nil
 }
 
-func (r *Repository) UpdateOrder(o *entity.Order) error {
+func (r *Repository) UpdateOrder(o entity.Order) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err

@@ -24,13 +24,13 @@ type Blackbox struct {
 	storage   entity.Storager
 	limit     uint32
 	needSleep int32
-	pool      map[uint64]*entity.Order
+	pool      map[uint64]entity.Order
 }
 
 type blackboxOrder struct {
 	*Blackbox
 	ctx   context.Context
-	order *entity.Order
+	order entity.Order
 }
 
 type blackboxOrderX struct {
@@ -158,7 +158,7 @@ func (b *Blackbox) updatePool() {
 		return
 	}
 	count := uint32(0)
-	pool := make(map[uint64]*entity.Order, limit)
+	pool := make(map[uint64]entity.Order, limit)
 	for k, order := range ors {
 		count++
 		if count > limit {

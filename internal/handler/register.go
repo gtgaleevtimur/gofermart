@@ -11,6 +11,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
+// Register - обработчик, регистрирующий нового пользователя.
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	content := r.Header.Get("Content-Type")
 	if content != "application/json" {
@@ -18,21 +19,18 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, err, http.StatusBadRequest)
 		return
 	}
-
 	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to read request body - %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 	defer r.Body.Close()
-
 	var accInfo entity.AccountInfo
 	err = json.Unmarshal(reqBody, &accInfo)
 	if err != nil {
 		c.error(w, r, fmt.Errorf("failed to unmarshal body - %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-
 	session, err := c.Storage.Register(&accInfo)
 	if err != nil {
 		msg := "failed to register new user"

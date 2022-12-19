@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/v5/middleware"
-	
+
 	"github.com/gtgaleevtimur/gofermart/internal/entity"
 )
 
@@ -47,6 +47,7 @@ type Controller struct {
 	Storage entity.Storager
 }
 
+// newController - функция-конструктор контролера хэндлера.
 func newController(s entity.Storager) *Controller {
 	return &Controller{Storage: s}
 }

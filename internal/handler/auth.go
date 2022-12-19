@@ -8,6 +8,7 @@ import (
 	"github.com/gtgaleevtimur/gofermart/internal/repository"
 )
 
+// auth - обработчик, проверяющий
 func (c *Controller) auth(w http.ResponseWriter, r *http.Request) (*entity.Session, error) {
 	st, err := r.Cookie("session_token")
 	if err != nil {

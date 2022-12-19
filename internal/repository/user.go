@@ -29,6 +29,7 @@ func (r *Repository) initUsers(ctx context.Context) error {
 	return nil
 }
 
+// initUsersStatements - метод, добавляющий стейтменты БД для работы с таблицей пользователей.
 func (r *Repository) initUsersStatements() error {
 	stmt, err := r.db.PrepareContext(
 		r.ctx,
@@ -69,6 +70,7 @@ func (r *Repository) initUsersStatements() error {
 	return nil
 }
 
+// AddUserDB - метод, добавляющий пользователя в БД.
 func (r *Repository) AddUserDB(u *entity.User) (uint64, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
@@ -114,17 +116,17 @@ func (r *Repository) AddUserDB(u *entity.User) (uint64, error) {
 	return u.ID, nil
 }
 
-func (r *Repository) GetUserDB(byKey interface{}) (*entity.User, error) {
+func (r *Repository) GetUserDB(byKey interface{}) (entity.User, error) {
+	var u entity.User
 	tx, err := r.db.Begin()
 	if err != nil {
-		return nil, err
+		return u, err
 	}
 	defer tx.Rollback()
 
 	txGetByLogin := tx.StmtContext(r.ctx, r.stmts["usersGetByLogin"])
 	txGetByID := tx.StmtContext(r.ctx, r.stmts["usersGetByID"])
 
-	var u entity.User
 	var row *sql.Row
 
 	switch key := byKey.(type) {
@@ -133,21 +135,21 @@ func (r *Repository) GetUserDB(byKey interface{}) (*entity.User, error) {
 	case uint64:
 		row = txGetByID.QueryRowContext(r.ctx, key)
 	default:
-		return nil, fmt.Errorf("given type not implemented")
+		return u, fmt.Errorf("given type not implemented")
 	}
 
 	err = row.Scan(&u.ID, &u.Login, &u.Password)
 	if err == sql.ErrNoRows {
-		return nil, ErrUserNotFound
+		return u, ErrUserNotFound
 	}
 	if err != nil {
-		return nil, err
+		return u, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, fmt.Errorf("get user transaction failed - %s", err.Error())
+		return u, fmt.Errorf("get user transaction failed - %s", err.Error())
 	}
 
-	return &u, nil
+	return u, nil
 }

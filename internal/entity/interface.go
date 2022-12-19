@@ -2,18 +2,18 @@ package entity
 
 type Storager interface {
 	AddWithdrawDB(withdraw *Withdraw) error
-	GetWithdrawalsDB(userID uint64) ([]*Withdraw, error)
+	GetWithdrawalsDB(userID uint64) ([]Withdraw, error)
 
 	AddUserDB(user *User) (uint64, error)
 	GetUserDB(byKey interface{}) (*User, error)
 
 	DeleteSessionDB(token string) error
 	AddSessionDB(session *Session) error
-	GetSessionDB(token string) (*Session, error)
+	GetSessionDB(token string) (Session, error)
 
 	GetOrderDB(orderID uint64) (*Order, error)
 	AddOrderDB(order *Order) error
-	GetOrdersDB(id uint64) ([]*Order, error)
+	GetOrdersDB(id uint64) ([]Order, error)
 
 	GetBalanceDB(userID uint64) (*Balance, error)
 
@@ -31,6 +31,6 @@ type Storager interface {
 	PostWithdraw(wd *WithdrawX) error
 	GetWithdrawals(userID uint64) ([]*WithdrawX, error)
 
-	GetPullOrders(limit uint32) (map[uint64]*Order, error)
-	UpdateOrder(order *Order) error
+	GetPullOrders(limit uint32) (map[uint64]Order, error)
+	UpdateOrder(order Order) error
 }
